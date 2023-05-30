@@ -27,30 +27,45 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * Method to create Employee
+     * @throws Exception 
      */
-	@Override
-	public String createEmployee(Employee emp) {
-		return empDao.createEmployee(emp);
-	}
+    @Override
+    public String createEmployee(Employee emp) throws Exception {
+        try {
+        	return empDao.createEmployee(emp);
+        }catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
 
-	/**
-	 * Method to retrieve Employee list with tax calculations
-	 */
-	@Override
-	public List<EmployeeTax> getEmployees() {
-		List<EmployeeTax> empTaxs = new ArrayList<>();
-		List<Employee> empList = empDao.getEmployees();
-		
-		if(!CollectionUtils.isEmpty(empList)) {
-			// Calculate each employee tax
-			empList.forEach(emp -> {
-				EmployeeTax et = getEmpTax(emp);
-				empTaxs.add(et);
-			});
-		}
-		return empTaxs;
-	}
-
+    /**
+     * Method to retrieve Employee list with tax calculations
+     * @throws Exception 
+     */
+    @Override
+    public List<EmployeeTax> getEmployees() throws Exception {
+        List<EmployeeTax> empTaxs = new ArrayList<>();
+        try {
+            List<Employee> empList = empDao.getEmployees();
+            
+            if(!CollectionUtils.isEmpty(empList)) {
+                // Calculate each employee tax
+                empList.forEach(emp -> {
+                    EmployeeTax et = getEmpTax(emp);
+                    empTaxs.add(et);
+                });
+            }
+            return empTaxs;
+        }catch(Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    
+    /**
+     * calculate yearly salary, tax and cess
+     * @param emp
+     * @return
+     */
 	private EmployeeTax getEmpTax(Employee emp) {
 		EmployeeTax et = new EmployeeTax();
 		et.setCode(emp.getId());
@@ -97,6 +112,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		int CurrentMonth = (Calendar.getInstance().get(Calendar.MONTH)+1);
 		String financiyalYearFrom="";
 		String financiyalYearTo="";
+		//finding financial year start and end dates
 		if (CurrentMonth<4) {
 		    financiyalYearFrom=(CurrentYear-1)+"-04-01";
 		    financiyalYearTo=(CurrentYear)+"-03-31";
@@ -107,13 +123,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 	    
 	    SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
 	    long diff = 0;
-
+	 // Find the days if employee joined after current financial year starts
 	    try {
 	        Date date1 = myFormat.parse(financiyalYearFrom);
 	        Date date2 = myFormat.parse(financiyalYearTo);
 	        long diffOfJoin = date1.getTime() - dateOfJoining.getTime();
-	      
+	        
 	        if(diffOfJoin > 0) {
+	        	//If employee joined before current financial year start, return full year days
 	        	diff = date2.getTime() - date1.getTime();
 	        } else {
 	        	diff = date2.getTime() - dateOfJoining.getTime();

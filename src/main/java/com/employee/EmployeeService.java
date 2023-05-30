@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface EmployeeService {
 
-	String createEmployee(Employee emp);
+	String createEmployee(Employee emp) throws Exception;
 
-	List<EmployeeTax> getEmployees();
+	List<EmployeeTax> getEmployees() throws Exception;
     
 }
